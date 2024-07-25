@@ -9,12 +9,24 @@ import { CgProfile } from "react-icons/cg";
 import { RiLogoutCircleFill } from "react-icons/ri";
 import { IoSettingsSharp, IoClose } from "react-icons/io5";
 import { ImProfile } from "react-icons/im";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { NavLink } from "react-router-dom";
+import { RiLoginCircleFill } from "react-icons/ri";
+import { SiGnuprivacyguard } from "react-icons/si";
+import { useNavigate } from "react-router-dom";
+
+// globalContext.
+import { GlobalContext } from "../context/GlobalState.jsx";
+import { toast } from "react-toastify";
 
 const SideHeader = () => {
+  const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSideHeaderVisible, setIsSideHeaderVisible] = useState(false);
+  const [logoutAuth, setLogooutAuth] = useState(false);
+  const { state } = useContext(GlobalContext);
+
+  console.log(state.LoginAuth || "");
 
   const handleButtonClick = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -22,6 +34,14 @@ const SideHeader = () => {
 
   const handleFaBarsClick = () => {
     setIsSideHeaderVisible(!isSideHeaderVisible);
+  };
+
+  // handleClick for LogOut.
+  const handleLogout = () => {
+    localStorage.removeItem("Login");
+    setLogooutAuth(true);
+    navigate("/");
+    toast.error("user logout successful.");
   };
 
   return (
@@ -107,19 +127,22 @@ const SideHeader = () => {
               <FaList className="mr-2 text-xl" />
               <span className="hidden md:block">My Lists</span>
             </NavLink>
-            <NavLink
-              to="/watched"
-              className={({ isActive }) =>
-                `w-full py-2 px-4 text-md rounded-md flex items-center mb-2 ${
-                  isActive
-                    ? "bg-red-500 text-white"
-                    : "hover:bg-red-500 hover:text-white"
-                }`
-              }
-            >
-              <FaCheckCircle className="mr-2 text-xl" />
-              <span className="hidden md:block">Watched</span>
-            </NavLink>
+            {/* watched */}
+            {state.LoginAuth.length > 0 && (
+              <NavLink
+                to="/watched"
+                className={({ isActive }) =>
+                  `w-full py-2 px-4 text-md rounded-md flex items-center mb-2 ${
+                    isActive
+                      ? "bg-red-500 text-white"
+                      : "hover:bg-red-500 hover:text-white"
+                  }`
+                }
+              >
+                <FaCheckCircle className="mr-2 text-xl" />
+                <span className="hidden md:block">Watched</span>
+              </NavLink>
+            )}
           </nav>
         </div>
 
@@ -129,28 +152,93 @@ const SideHeader = () => {
             onClick={handleButtonClick}
           >
             <div className="flex items-center">
-              <CgProfile className="mr-2 text-xl" />
-              <span className="hidden md:block">GUEST</span>
+              {state.LoginAuth.length > 0 ? (
+                <>
+                  <span className="mr-2 text-xl border rounded-md p-1">
+                    <CgProfile className="text-xl" />
+                    {/* {state.LoginAuth.toUpperCase().charAt(0) || "Demo"} */}
+                  </span>
+                  <span className="hidden md:inline-block lg:text-[16px] md:text-[7px]">
+                    {state.LoginAuth || "xyz@gmail.com"}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="mr-2 text-xl border rounded-md p-1">
+                    <CgProfile className="text-xl" />
+                  </span>
+                  <span className="hidden md:inline-block">GUEST</span>
+                </>
+              )}
             </div>
             <span className="hidden md:block text-xl">...</span>
           </button>
           {isDropdownOpen && (
-            <div className="absolute bottom-full mb-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
-              <ul>
-                <li className="py-2 px-4 hover:bg-gray-100 cursor-pointer flex items-center">
-                  <ImProfile className="mr-2 text-xl" title="Profile" />
-                  <span className="hidden md:block">Profile</span>
-                </li>
-                <li className="py-2 px-4 hover:bg-gray-100 cursor-pointer flex items-center">
-                  <IoSettingsSharp className="mr-2 text-xl" title="Settings" />
-                  <span className="hidden md:block">Settings</span>
-                </li>
-                <li className="py-2 px-4 hover:bg-gray-100 cursor-pointer flex items-center">
-                  <RiLogoutCircleFill className="mr-2 text-xl" title="Logout" />
-                  <span className="hidden md:block">Logout</span>
-                </li>
-              </ul>
-            </div>
+            <>
+              {state.LoginAuth && state.LoginAuth.length > 0 ? (
+                <div className="absolute bottom-full mb-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                  <ul className="dropdown-side-profile">
+                    <li className="py-2 px-4 hover:bg-blue-500 hover:overflow-hidden hover:text-white cursor-pointer flex items-center">
+                      <ImProfile className="mr-2 text-xl" title="Profile" />
+                      <span className="hidden md:block">Profile</span>
+                    </li>
+                    <li className="py-2 px-4 hover:bg-blue-500 hover:text-white cursor-pointer flex items-center">
+                      <IoSettingsSharp
+                        className="mr-2 text-xl"
+                        title="Settings"
+                      />
+                      <span className="hidden md:block">Settings</span>
+                    </li>
+                    <li
+                      className="py-2 px-4 hover:bg-blue-500 hover:text-white cursor-pointer flex items-center"
+                      title="signUp"
+                    >
+                      <button type="button" className="flex items-center">
+                        <RiLogoutCircleFill
+                          className="mr-2 text-xl"
+                          title="Logout"
+                        />
+                        <span
+                          className="hidden md:block"
+                          onClick={handleLogout}
+                        >
+                          Logout
+                        </span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                <div className="absolute bottom-full mb-2 w-full bg-white border border-gray-300 rounded-md shadow-lg z-50">
+                  <ul className="dropdown-side-profile">
+                    <li
+                      className="py-2 px-4 hover:bg-blue-500 hover:text-white cursor-pointer flex items-center"
+                      title="signUp"
+                    >
+                      <NavLink to="/signup" className="flex items-center">
+                        <SiGnuprivacyguard
+                          className="mr-2 text-xl"
+                          title="signup"
+                        />
+                        <span className="hidden md:block">SignUp</span>
+                      </NavLink>
+                    </li>
+                    <li
+                      className="py-2 px-4 hover:bg-blue-500 hover:text-white cursor-pointer flex items-center"
+                      title="signIn"
+                    >
+                      <NavLink to="/signin" className="flex items-center">
+                        <RiLoginCircleFill
+                          className="mr-2 text-xl"
+                          title="signin"
+                        />
+                        <span className="hidden md:block">SignIn</span>
+                      </NavLink>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

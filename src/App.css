@@ -1,4 +1,8 @@
-a.active {
+nav a.active {
     background-color: red !important;
     color: white !important;
+}
+
+.dropdown-side-profile li a.active {
+    color: blue !important;
 }

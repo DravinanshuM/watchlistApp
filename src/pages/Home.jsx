@@ -50,8 +50,10 @@ const Home = () => {
         const response = await getAllMovies(query);
         if (response?.status === 200) {
           setMovies(response.data.Search || []);
+          console.log(response.data.Search);
           toast.success("response");
         } else {
+          setMovies([]);
           setError("Something went wrong.");
           console.error("Something went wrong.");
         }
